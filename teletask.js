@@ -3,56 +3,29 @@ var net = require('net');
 var HOST = '192.168.1.5';
 var PORT = 55957;
 
-var client = new net.Socket();
-console.log("Starting NodeJS Teletask API...");
-client.connect(PORT, HOST, function() {
 
-    console.log('CONNECTED TO: ' + HOST + ':' + PORT);
-    command = 7;
-    funct = 1;
-    number = 21;
-    setting = 103;
-    request = new Request(command, funct, number,setting);
-    console.log(request.toString());
-    // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client 
-    client.write(request.toString());
-
-});
-
-// Add a 'data' event handler for the client socket
-// data is what the server sent to this socket
-client.on('data', function(data) {
-    
-    console.log('DATA: ' + data);
-    // Close the client socket completely
-    client.destroy();
-    
-});
-
-// Add a 'close' event handler for the client socket
-client.on('close', function() {
-    console.log('Connection closed');
-});
-
- var Request = function(command, funct, number, setting){
+function Request(command, fnc, number, setting){
  	start = 2;
  	parameters = [];
- 	parameters.push(1); //central
- 	parameters.push(funct);
- 	parameters.push(0);
- 	parameters.push(number);
- 	parameters.push(setting);
+ 	if(command != Teletask.commands.keepalive && command != Teletask.commands.functionlog) parameters.push(1); //central
+ 	if(fnc) parameters.push(fnc);
+ 	if(number && command != Teletask.commands.functionlog) parameters.push(0);
+ 	if(number) parameters.push(number);
+ 	if(setting) parameters.push(setting);
 
  	length = function(){
  		return parameters.length + 3;
  	}
 
  	checksum = function(){
- 		parameterSum = parameters.reduce(
-           function(prev,current){
-             return  current + prev;
-           }
-         );
+ 		parameterSum = 0;
+ 		if(parameters.length > 0){
+	 		parameterSum = parameters.reduce(
+	           function(prev,current){
+	             return  current + prev;
+	           }
+	         );
+ 		}
  		return (start + length() + command + parameterSum) % 255;
  	}
 
@@ -63,3 +36,118 @@ client.on('close', function() {
  		//return "s,8,7,1,1,0,21,103,143,";
  	}
  }
+
+ function Report(raw){
+ 	centralUnit = 0;
+ 	fnc = 0;
+ 	number = 0;
+ 	errorState = 0; //not used by teletask
+ 	state = 0;
+
+ 	this.length = 0;
+
+ 	if (raw[0] != 2) throw "Startbit not correct";
+ 	length = raw[1];
+
+ }
+
+function Teletask(host, port){
+	socket = new net.Socket;
+	console.log("Starting NodeJS Teletask API...");
+	socket.connect(PORT, HOST, function() {
+	    console.log('CONNECTED TO: ' + HOST + ':' + PORT);
+	});
+
+	socket.on('data', function(data) {
+	    console.log('DATA('+data.length+'): ' + data.toString('hex'));
+	    //socket.destroy();
+	});
+
+	socket.on('close', function() {
+	    console.log('Connection closed');
+	});
+
+	this.set = function(fnc,number, setting, data){
+	    request = new Request(Teletask.commands.set, fnc, number,setting);
+	    console.log("SET: " + request.toString());
+	    socket.write(request.toString());
+	}
+
+	this.get = function(fnc, number){
+		request = new Request(Teletask.commands.get, fnc, number, null);
+	    console.log("GET: " + request.toString());
+	    socket.write(request.toString());
+	}
+
+	this.startLog = function(fnc){
+		request = new Request(Teletask.commands.functionlog, fnc, true);
+		console.log("STARTLOG: " + request.toString());
+	    socket.write(request.toString());
+	}
+
+	this.keepalive = function(){
+		request = new Request(Teletask.commands.keepalive);
+		console.log("KEEPALIVE: " + request.toString());
+	    socket.write(request.toString());
+	}
+}
+
+Teletask.functions = {
+	"relay": 1,
+	"dimmer": 2,
+	"motor": 6,
+	"localmood": 8,
+	"timedmood": 9,
+	"generalmood" : 10,
+	"flag": 15,
+	"sensor": 20,
+	"audio": 31,
+	"regime": 14,
+	"service": 53,
+	"message": 54,
+	"condition": 60 
+};
+
+Teletask.settings = {
+	"on": 255,
+	"toggle": 103,
+	"off": 0
+};
+
+Teletask.commands = {
+	"set": 7,
+	"get": 6,
+	"groupget": 9,
+	"functionlog": 3,
+	"eventreport": 16,
+	"writedisplaymessage": 4,
+	"keepalive": 11
+}
+
+
+var teletask = new Teletask(HOST,PORT);
+
+//teletask.get(Teletask.functions.relay, 21);
+//teletask.set(Teletask.functions.relay, 21, Teletask.settings.toggle);
+//teletask.get(Teletask.functions.relay, 21);
+//teletask.keepalive();
+teletask.startLog(Teletask.functions.relay);
+
+/*var client = new net.Socket();
+console.log("Starting NodeJS Teletask API...");
+client.connect(PORT, HOST, function() {
+
+    console.log('CONNECTED TO: ' + HOST + ':' + PORT);
+    command = Teletask.commands.set;
+    fnc = Teletask.functions.relay;
+    number = 21;
+    setting = Teletask.settings.toggle;
+    request = new Request(command, fnc, number,setting);
+    console.log(request.toString());
+    // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client 
+    client.write(request.toString());
+
+});*/
+
+
+
