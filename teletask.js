@@ -28,7 +28,11 @@ TeletaskRequest.prototype.checksum = function(){
 
 TeletaskRequest.prototype.toString = function(){
 	var separator = ',';
-	var data = ["s", this.length(), this.command , this.parameters, this.checksum()];
+	var data = [this.start, this.length(), this.command]
+	if (this.parameters.length != 0){
+		data.push(this.parameters);
+	}
+	data.push(this.checksum());
 	return data.join(separator) + separator;
 	//return "s,8,7,1,1,0,21,103,143,";
 };
