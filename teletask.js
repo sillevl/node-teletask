@@ -28,7 +28,7 @@ TeletaskRequest.prototype.checksum = function(){
 
 TeletaskRequest.prototype.toString = function(){
 	var separator = ',';
-	var data = [this.start, this.length(), this.command]
+	var data = ["s", this.length(), this.command]
 	if (this.parameters.length != 0){
 		data.push(this.parameters);
 	}
@@ -46,11 +46,11 @@ TeletaskRequest.prototype.toBinary = function(){
 	return new Buffer(data);
 };
 
-TeletaskKeepAliveRequest = function(){};
-TeletaskKeepAliveRequest.prototype = new TeletaskRequest();
-TeletaskKeepAliveRequest.prototype.contstructor = function(){
+TeletaskKeepAliveRequest = function(){
 	this.command = Teletask.commands.keepalive;
-}
+};
+TeletaskKeepAliveRequest.prototype = new TeletaskRequest();
+TeletaskKeepAliveRequest.prototype.constructor = TeletaskKeepAliveRequest;
 
 function Request(command, fnc, number, setting){
  	start = 2;
@@ -135,9 +135,7 @@ function Teletask(host, port){
 
 	this.keepalive = function(){
 		request = new TeletaskKeepAliveRequest();
-		//request = new Request(Teletask.commands.keepalive);
 		console.log("KEEPALIVE: " + request.toString());
-		console.log("KEEPALIVE binary: " + request.toBinary());
 	    socket.write(request.toBinary());
 	}
 }
