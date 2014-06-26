@@ -40,7 +40,9 @@ TeletaskRequest.prototype.toString = function(){
 TeletaskRequest.prototype.toBinary = function(){
 	var data = [this.start, this.length(), this.command]
 	if (this.parameters.length != 0){
-		data.push(this.parameters);
+		this.parameters.map(function(item){
+			data.push(item);
+		});
 	}
 	data.push(this.checksum());
 	return new Buffer(data);
@@ -51,6 +53,13 @@ TeletaskKeepAliveRequest = function(){
 };
 TeletaskKeepAliveRequest.prototype = new TeletaskRequest();
 TeletaskKeepAliveRequest.prototype.constructor = TeletaskKeepAliveRequest;
+
+TeletaskSetRequest = function(fnc,number, setting, data){
+	this.command = Teletask.commands.set;
+	this.parameters.push(1,fnc,0, number,setting);
+};
+TeletaskSetRequest.prototype = new TeletaskRequest();
+TeletaskSetRequest.prototype.constructor = TeletaskSetRequest;
 
 function Request(command, fnc, number, setting){
  	start = 2;
@@ -116,9 +125,10 @@ function Teletask(host, port){
 	});
 
 	this.set = function(fnc,number, setting, data){
-	    request = new Request(Teletask.commands.set, fnc, number,setting);
+	    request = new TeletaskSetRequest(fnc, number,setting);
 	    console.log("SET: " + request.toString());
-	    socket.write(request.toString());
+	    console.log("SET: " + request.toBinary().toString("hex"));
+	    socket.write(request.toBinary());
 	}
 
 	this.get = function(fnc, number){
@@ -176,9 +186,11 @@ Teletask.commands = {
 var teletask = new Teletask(HOST,PORT);
 
 //teletask.get(Teletask.functions.relay, 21);
-//teletask.set(Teletask.functions.relay, 21, Teletask.settings.toggle);
+setTimeout(function(){
+	teletask.set(Teletask.functions.relay, 21, Teletask.settings.toggle);
+}, 1000);
 //teletask.get(Teletask.functions.relay, 21);
-teletask.keepalive();
+//teletask.keepalive();
 //teletask.startLog(Teletask.functions.relay);
 
 /*var client = new net.Socket();
