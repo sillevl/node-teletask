@@ -4,6 +4,35 @@ var HOST = '192.168.1.5';
 var PORT = 55957;
 
 
+function TeletaskRequest() {
+	this.start = 2;
+	this.parameters = [];
+	this.command = 0;
+};
+
+TeletaskRequest.prototype.length = function(){
+	return this.parameters.length + 3
+};
+
+TeletaskRequest.prototype.checksum = function(){
+	var parameterSum = 0;
+	if(this.parameters.length > 0){
+		parameterSum = this.parameters.reduce(
+			function(prev,current){
+				return  current + prev;
+			}
+		);
+	}
+	return (this.start + this.length() + this.command + parameterSum) % 255;
+};
+
+TeletaskRequest.prototype.toString = function(){
+	var separator = ',';
+	var data = ["s", this.length(), this.command , this.parameters, this.checksum()];
+	return data.join(separator) + separator;
+	//return "s,8,7,1,1,0,21,103,143,";
+};
+
 function Request(command, fnc, number, setting){
  	start = 2;
  	parameters = [];
@@ -86,7 +115,8 @@ function Teletask(host, port){
 	}
 
 	this.keepalive = function(){
-		request = new Request(Teletask.commands.keepalive);
+		request = new TeletaskRequest();
+		//request = new Request(Teletask.commands.keepalive);
 		console.log("KEEPALIVE: " + request.toString());
 	    socket.write(request.toString());
 	}
@@ -130,8 +160,8 @@ var teletask = new Teletask(HOST,PORT);
 //teletask.get(Teletask.functions.relay, 21);
 //teletask.set(Teletask.functions.relay, 21, Teletask.settings.toggle);
 //teletask.get(Teletask.functions.relay, 21);
-//teletask.keepalive();
-teletask.startLog(Teletask.functions.relay);
+teletask.keepalive();
+//teletask.startLog(Teletask.functions.relay);
 
 /*var client = new net.Socket();
 console.log("Starting NodeJS Teletask API...");
