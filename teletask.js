@@ -45,6 +45,7 @@ TeletaskRequest.prototype.toBinary = function(){
 		});
 	}
 	data.push(this.checksum());
+	console.log(data.toString());
 	return new Buffer(data);
 };
 
@@ -56,10 +57,24 @@ TeletaskKeepAliveRequest.prototype.constructor = TeletaskKeepAliveRequest;
 
 TeletaskSetRequest = function(fnc,number, setting, data){
 	this.command = Teletask.commands.set;
-	this.parameters.push(1,fnc,0, number,setting);
+	this.parameters = [1,fnc,0, number,setting];
 };
 TeletaskSetRequest.prototype = new TeletaskRequest();
 TeletaskSetRequest.prototype.constructor = TeletaskSetRequest;
+
+TeletaskGetRequest = function(fnc,number){
+	this.command = Teletask.commands.get;
+	this.parameters = [1,fnc,0, number];
+};
+TeletaskGetRequest.prototype = new TeletaskRequest();
+TeletaskGetRequest.prototype.constructor = TeletaskGetRequest;
+
+TeletaskLogRequest = function(fnc,state){
+	this.command = Teletask.commands.functionlog;
+	this.parameters = [fnc,state];
+};
+TeletaskLogRequest.prototype = new TeletaskRequest();
+TeletaskLogRequest.prototype.constructor = TeletaskLogRequest;
 
 function Request(command, fnc, number, setting){
  	start = 2;
@@ -127,20 +142,25 @@ function Teletask(host, port){
 	this.set = function(fnc,number, setting, data){
 	    request = new TeletaskSetRequest(fnc, number,setting);
 	    console.log("SET: " + request.toString());
-	    console.log("SET: " + request.toBinary().toString("hex"));
 	    socket.write(request.toBinary());
 	}
 
 	this.get = function(fnc, number){
-		request = new Request(Teletask.commands.get, fnc, number, null);
+		request = new TeletaskGetRequest(fnc, number);
 	    console.log("GET: " + request.toString());
-	    socket.write(request.toString());
+	    socket.write(request.toBinary());
 	}
 
-	this.startLog = function(fnc){
-		request = new Request(Teletask.commands.functionlog, fnc, true);
-		console.log("STARTLOG: " + request.toString());
-	    socket.write(request.toString());
+	this.logEnable = function(fnc){
+		request = new TeletaskLogRequest(fnc, 255);
+		console.log("START LOG: " + request.toString());
+	    socket.write(request.toBinary());
+	}
+
+	this.logDisable = function(fnc){
+		request = new TeletaskLogRequest(fnc, 0);
+		console.log("STOP LOG: " + request.toString());
+	    socket.write(request.toBinary());
 	}
 
 	this.keepalive = function(){
@@ -186,12 +206,23 @@ Teletask.commands = {
 var teletask = new Teletask(HOST,PORT);
 
 //teletask.get(Teletask.functions.relay, 21);
-setTimeout(function(){
-	teletask.set(Teletask.functions.relay, 21, Teletask.settings.toggle);
-}, 1000);
+	/*setTimeout(function(){
+		teletask.get(Teletask.functions.relay, 21);
+	}, 500);
+	setTimeout(function(){
+		teletask.get(Teletask.functions.relay, 21);
+	}, 800);
+	setTimeout(function(){
+		teletask.set(Teletask.functions.relay, 21, Teletask.settings.toggle);
+	}, 1000);
+	setTimeout(function(){
+		teletask.get(Teletask.functions.relay, 21);
+	}, 1500);*/
 //teletask.get(Teletask.functions.relay, 21);
 //teletask.keepalive();
-//teletask.startLog(Teletask.functions.relay);
+setTimeout(function(){
+	teletask.logEnable(Teletask.functions.relay);
+}, 500);
 
 /*var client = new net.Socket();
 console.log("Starting NodeJS Teletask API...");
