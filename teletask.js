@@ -5,10 +5,18 @@ var request = require('./lib/request');
 var functions = require('./lib/functions');
 var settings = require('./lib/settings');
 
+var util = require('util');
+var EventEmitter = require('events').EventEmitter;
+
 exports.functions = functions;
 exports.settings = settings;
 
-exports.connect = function(host, port, callback){
+connect = function(host, port, callback){
+
+	EventEmitter.call(this);
+
+	var self = this;
+
 	socket = new net.Socket;
 	socket.connect(port, host, function() {
 	   	if (typeof callback === "function") {
@@ -18,7 +26,7 @@ exports.connect = function(host, port, callback){
 
 	socket.on('data', function(data) {
 		if(data[0] != 10 && data.length != 1){
-	    	console.log('DATA('+data.length+'): ' + data.toString('hex'));
+	    	self.emit('report', data.toString('hex'));
 	    }
 	});
 
@@ -44,33 +52,30 @@ exports.connect = function(host, port, callback){
 
 	this.set = function(fnc,number, setting, data){
 	    request = new TeletaskSetRequest(fnc, number,setting);
-	    //console.log("SET: " + request.toString());
 	    socket.write(request.toBinary());
 	}
 
 	this.get = function(fnc, number){
 		request = new TeletaskGetRequest(fnc, number);
-	    //console.log("GET: " + request.toString());
-	    //socket.write(request.toBinary());
-	    this.write(request);
+	    return this.write(request);
 	}
 
 	this.logEnable = function(fnc){
 		request = new TeletaskLogRequest(fnc, 255);
-		//console.log("START LOG: " + request.toString());
 	    socket.write(request.toBinary());
 	}
 
 	this.logDisable = function(fnc){
 		request = new TeletaskLogRequest(fnc, 0);
-		//console.log("STOP LOG: " + request.toString());
 	    socket.write(request.toBinary());
 	}
 
 	this.keepalive = function(){
 		request = new TeletaskKeepAliveRequest();
-		//console.log("KEEPALIVE: " + request.toString());
 	    socket.write(request.toBinary());
 	}
 }
 
+util.inherits(connect, EventEmitter);
+
+exports.connect = connect;
