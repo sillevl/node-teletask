@@ -62,6 +62,11 @@ connect = function(host, port, callback){
 	    this.write(request);
 	}
 
+	this.groupget = function(fnc, numbers){
+		var request = new GroupGet(fnc, numbers);
+	    this.write(request);
+	}
+
 	this.logEnable = function(fnc){
 		var request = new Log(fnc, settings.on);
 	    this.write(request);
