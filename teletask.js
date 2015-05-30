@@ -27,6 +27,8 @@ connect = function(host, port, callback){
 	socket.on('data', function(data) {
 		if(data[0] != 10 && data.length != 1){
 	    	self.emit('report', data.toString('hex'));
+	    } else {
+	    	console.log('data received: ' + data.toString('hex'));
 	    }
 	});
 
@@ -51,28 +53,28 @@ connect = function(host, port, callback){
 	}
 
 	this.set = function(fnc,number, setting, data){
-	    request = new TeletaskSetRequest(fnc, number,setting);
-	    socket.write(request.toBinary());
+	    var request = new Set(fnc, number,setting);
+	    this.write(request);
 	}
 
 	this.get = function(fnc, number){
-		request = new TeletaskGetRequest(fnc, number);
-	    return this.write(request);
+		var request = new Get(fnc, number);
+	    this.write(request);
 	}
 
 	this.logEnable = function(fnc){
-		request = new TeletaskLogRequest(fnc, 255);
-	    socket.write(request.toBinary());
+		var request = new Log(fnc, settings.on);
+	    this.write(request);
 	}
 
 	this.logDisable = function(fnc){
-		request = new TeletaskLogRequest(fnc, 0);
-	    socket.write(request.toBinary());
+		var request = new Log(fnc, settings.off);
+	    this.write(request);
 	}
 
 	this.keepalive = function(){
-		request = new TeletaskKeepAliveRequest();
-	    socket.write(request.toBinary());
+		var request = new KeepAlive();
+	    this.write(request);
 	}
 }
 
