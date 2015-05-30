@@ -11,12 +11,15 @@ exports.settings = settings;
 exports.connect = function(host, port, callback){
 	socket = new net.Socket;
 	socket.connect(port, host, function() {
-	    //console.log('connected');
-	    callback();
+	   	if (typeof callback === "function") {
+	    	callback();
+	    }
 	});
 
 	socket.on('data', function(data) {
-	    console.log('DATA('+data.length+'): ' + data.toString('hex'));
+		if(data[0] != 10 && data.length != 1){
+	    	console.log('DATA('+data.length+'): ' + data.toString('hex'));
+	    }
 	});
 
 	socket.on('close', function() {
@@ -27,6 +30,18 @@ exports.connect = function(host, port, callback){
 		console.log(err);
 	});
 
+	this.write = function(data){
+		socket.write(data.toBinary());
+		var timeout = setTimeout(function(){
+			throw "Acknowledge timeout (1000ms)";
+		}, 1000);
+		socket.on('data', function(data) {
+			if(data[0] == 10 && data.length == 1){
+				clearTimeout(timeout);
+			}
+		});
+	}
+
 	this.set = function(fnc,number, setting, data){
 	    request = new TeletaskSetRequest(fnc, number,setting);
 	    //console.log("SET: " + request.toString());
@@ -36,7 +51,8 @@ exports.connect = function(host, port, callback){
 	this.get = function(fnc, number){
 		request = new TeletaskGetRequest(fnc, number);
 	    //console.log("GET: " + request.toString());
-	    socket.write(request.toBinary());
+	    //socket.write(request.toBinary());
+	    this.write(request);
 	}
 
 	this.logEnable = function(fnc){

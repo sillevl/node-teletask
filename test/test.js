@@ -24,14 +24,28 @@ describe('Teletask', function(){
   			//teletask.get(Teletask.functions.relay, 21);
   		})
   	})
+
+  	describe('logger', function(){
+  		it('toggle the status of relay 21', function(){
+  			teletask.logEnable(Teletask.functions.relay);
+  			teletask.set(Teletask.functions.relay, 21, Teletask.settings.toggle);
+  		})
+  	})
+
+  	describe('keepalive', function(){
+  		it('toggle the status of relay 21', function(){
+  			teletask.keepalive();
+  		})
+  	})
 })
+
 
 
 /*
 var HOST = '192.168.1.5';
 var PORT = 55957;
 
-var Teletask = require('./lib/teletask');
+var Teletask = require('../teletask');
 
 var teletask = new Teletask.connect(HOST,PORT, function(){
 
