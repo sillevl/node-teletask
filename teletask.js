@@ -4,6 +4,7 @@ var net = require('net');
 var request = require('./lib/request');
 var functions = require('./lib/functions');
 var settings = require('./lib/settings');
+var Report = require('./lib/report');
 
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
@@ -26,10 +27,8 @@ connect = function(host, port, callback){
 
 	socket.on('data', function(data) {
 		if(data[0] != 10 && data.length != 1){
-	    	self.emit('report', data.toString('hex'));
-	    } else {
-	    	console.log('data received: ' + data.toString('hex'));
-	    }
+	    	self.emit('report', Report.parse(data));
+	    } 
 	});
 
 	socket.on('close', function() {
