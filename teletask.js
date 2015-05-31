@@ -14,6 +14,8 @@ exports.settings = settings;
 
 connect = function(host, port, callback){
 
+	var i = 0;
+
 	EventEmitter.call(this);
 
 	var self = this;
@@ -25,11 +27,11 @@ connect = function(host, port, callback){
 	    }
 	});
 
-	socket.on('data', function(data) {
+/*	socket.on('data', function(data) {
 		if(data[0] != 10 && data.length != 1){
 	    	self.emit('report', Report.parse(data));
 	    } 
-	});
+	});*/
 
 	socket.on('close', function() {
 	    console.log('Connection closed');
@@ -39,16 +41,30 @@ connect = function(host, port, callback){
 		console.log(err);
 	});
 
-	this.write = function(data){
-		socket.write(data.toBinary());
-		var timeout = setTimeout(function(){
-			throw "Acknowledge timeout (1000ms)";
-		}, 1000);
-		socket.on('data', function(data) {
-			if(data[0] == 10 && data.length == 1){
-				clearTimeout(timeout);
+	this.write = function(data, callback){
+		socket.write(data.toBinary(), function(){
+			g = function(data) {
+				console.log("indexof: " + data.toString('hex').indexOf(2) + ' ' +data.toString('hex'));
+				if(data[0] == 10 && data.length == 1){
+					//clearTimeout(timeout);
+				} else {
+					try{
+						var resp = Report.parse(data);
+						console.log("iterator: " + ++i);
+						console.log('data: ' + data.toString('hex'))
+						socket.removeListener('data', g);
+						callback(resp);
+					} catch (err) {
+						console.log(err)
+					}
+				}
 			}
+			socket.on('data', g);
 		});
+/*		var timeout = setTimeout(function(){
+			throw "Acknowledge timeout (1000ms)";
+		}, 1000);*/
+
 	}
 
 	this.set = function(fnc,number, setting, data){
@@ -56,9 +72,11 @@ connect = function(host, port, callback){
 	    this.write(request);
 	}
 
-	this.get = function(fnc, number){
+	this.get = function(fnc, number, callback){
 		var request = new Get(fnc, number);
-	    this.write(request);
+	    this.write(request, function(data){
+	    	callback(data);
+	    });
 	}
 
 	this.groupget = function(fnc, numbers){
