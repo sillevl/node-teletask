@@ -1,3 +1,4 @@
+var log = require('./lib/logger')
 
 var net = require('net');
 
