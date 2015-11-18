@@ -31,12 +31,8 @@ connect = function(host, port, callback){
 /*	socket.on('data', function(data) {
 		if(data[0] != 10 && data.length != 1){
 	    	self.emit('report', Report.parse(data));
-	    } 
+	    }
 	});*/
-
-	socket.on('close', function() {
-	    console.log('Connection closed');
-	});
 
 	socket.on('error', function(err){
 		console.log(err);
@@ -45,18 +41,18 @@ connect = function(host, port, callback){
 	this.write = function(data, callback){
 		socket.write(data.toBinary(), function(){
 			g = function(data) {
-				console.log("indexof: " + data.toString('hex').indexOf(2) + ' ' +data.toString('hex'));
 				if(data[0] == 10 && data.length == 1){
 					//clearTimeout(timeout);
 				} else {
 					try{
-						var resp = Report.parse(data);
-						console.log("iterator: " + ++i);
-						console.log('data: ' + data.toString('hex'))
+						var response = Report.parse(data);
 						socket.removeListener('data', g);
-						callback(resp);
+						if (typeof callback === "function") {
+							callback(response);
+						}
 					} catch (err) {
-						console.log(err)
+						console.log("Parsing error: " + err)
+						socket.removeListener('data', g);
 					}
 				}
 			}
@@ -75,9 +71,11 @@ connect = function(host, port, callback){
 
 	this.get = function(fnc, number, callback){
 		var request = new Get(fnc, number);
-	    this.write(request, function(data){
-	    	callback(data);
-	    });
+	  this.write(request, function(data){
+			if (typeof callback === "function") {
+				callback(data);
+			}
+    });
 	}
 
 	this.groupget = function(fnc, numbers){
