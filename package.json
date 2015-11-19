@@ -24,8 +24,8 @@
   "dependencies": {
     "winston": "^1.0.0"
   },
-  "repository" :
-  { "type" : "git"
-  , "url" : "https://github.com/sillevl/node-teletask"
+  "repository" : {
+    "type" : "git"
+  , "url" : "git+https://github.com/sillevl/node-teletask.git"
   }
 }
