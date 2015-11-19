@@ -1,7 +1,6 @@
 var Teletask = require('../teletask'),
 		net = require('net'),
-		expect  = require('chai').expect,
-		assert = require("assert")
+		expect  = require('chai').expect
 
 describe('Teletask', function(){
 
