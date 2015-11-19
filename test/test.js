@@ -4,7 +4,7 @@ var Teletask = require('../teletask'),
 
 describe('Teletask', function(){
 
-	var HOST = '127.0.0.1';
+	var HOST = 'localhost';
 	var PORT = 55957;
 
 	var teletask;
