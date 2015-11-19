@@ -12,7 +12,7 @@ describe('Teletask', function(){
 
 	beforeEach(function(done){
 		teletask = new Teletask.connect(HOST,PORT);
-		server = net.createServer().listen(PORT,function(done){
+		server = net.createServer().listen(PORT,function(){
 			console.log("server connected")
 			done()
 		});
