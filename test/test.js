@@ -23,6 +23,7 @@ describe('Teletask', function(){
 	})
 	describe('Keepalive', function(){
 		it('should should send keepalive', function(done){
+			this.setTimeout(15000)
 			teletask.keepalive();
 			server.once("connection", function(sock){
 				console.log("test: connection event")
