@@ -4,7 +4,7 @@ var Teletask = require('../teletask'),
 
 describe('Teletask', function(){
 
-	var HOST = '127.0.0.1';
+	var HOST = 'localhost';
 	var PORT = 55957;
 
 	var teletask;
@@ -23,7 +23,6 @@ describe('Teletask', function(){
 	})
 	describe('Keepalive', function(){
 		it('should should send keepalive', function(done){
-			this.setTimeout(15000)
 			teletask.keepalive();
 			server.once("connection", function(sock){
 				console.log("test: connection event")
