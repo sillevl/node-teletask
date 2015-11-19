@@ -12,7 +12,10 @@ describe('Teletask', function(){
 
 	beforeEach(function(done){
 		teletask = new Teletask.connect(HOST,PORT);
-		server = net.createServer().listen(PORT,done);
+		server = net.createServer().listen(PORT,function(done){
+			console.log("server connected")
+			done()
+		});
 	})
 
 	afterEach(function() {
@@ -22,7 +25,9 @@ describe('Teletask', function(){
 		it('should should send keepalive', function(done){
 			teletask.keepalive();
 			server.once("connection", function(sock){
+				console.log("test: connection event")
 	      sock.once("data", function(data) {
+					console.log("test: data event")
 					expect(data).to.be.eql(new Buffer([2, 3, 0x0b, 0x10]))
 					done()
 	      })
