@@ -1,8 +1,8 @@
-var Teletask = require('../teletask'),
-		net = require('net'),
-		expect  = require('chai').expect
+var Teletask 	= require('../teletask'),
+		net 			= require('net'),
+		expect  	= require('chai').expect
 
-describe('Teletask', function(){
+describe('Relays', function(){
 
 	var HOST = 'localhost';
 	var PORT = 55957;
@@ -18,21 +18,8 @@ describe('Teletask', function(){
 	afterEach(function() {
 		server.close()
 	})
-	describe('Keepalive', function(){
-		it('should should send keepalive', function(done){
-			teletask.keepalive();
-			server.once("connection", function(sock){
-	      sock.once("data", function(data) {
-					expect(data).to.be.eql(new Buffer([2, 3, 0x0b, 0x10]))
-					done()
-	      })
-	    })
-		})
 
-		it('should keep sending keepalive after interval');
-	})
-
-	describe('set', function(){
+	describe('set a relay', function(){
 		it('should toggle the status of relay 21', function(done){
 			teletask.set(Teletask.functions.relay, 21, Teletask.settings.toggle);
 			server.once("connection", function(sock){
@@ -75,7 +62,7 @@ describe('Teletask', function(){
 		})
 	})
 
-	describe('get', function(){
+	describe('get the status of a relay', function(){
 		it('should get status of relay 21 (which is off)', function(done){
 			teletask.get(Teletask.functions.relay, 21, function(report){
 				expect(report.value.value).to.be.equal(Teletask.settings.off)
@@ -102,20 +89,4 @@ describe('Teletask', function(){
 			})
 		})
 	})
-
-	describe('Logger', function(){
-		it('should enable logger for relay events')
-		it('should enable logger all events')
-		it('should receive events for relay logging')
-		it('should receive all events')
-	})
-
-	// describe('logger', function(){
-	// 	it('toggle the status of relay 21', function(){
-	// 		teletask.logEnable(Teletask.functions.relay);
-	// 		teletask.set(Teletask.functions.relay, 21, Teletask.settings.toggle);
-	// 	})
-	// })
-
-
 })
