@@ -2,7 +2,7 @@ var Teletask 	= require('../teletask'),
 		net 			= require('net'),
 		expect  	= require('chai').expect
 
-describe('Sensor', function(){
+describe('Sensors', function(){
 
 	var HOST = 'localhost';
 	var PORT = 55957;
@@ -13,60 +13,72 @@ describe('Sensor', function(){
 	beforeEach(function(done){
 		teletask = new Teletask.connect(HOST,PORT);
 		server = net.createServer().listen(PORT,done);
+		server.once("connection", function(sock){
+			sock.once("data", function(data) {
+				sock.write(new Buffer([2,26,16,1,20,0,4,0,11,49,11,119,11,114,11,14,25,0,94,89,255,0,9,0,11,214,82]));
+			})
+		})
 	})
 
 	afterEach(function() {
 		server.close()
 	})
 
-	it('should get status of temperature sensor 5', function(done){
+	it('should get temperature of sensor 5', function(done){
 		teletask.get(Teletask.functions.sensor, 5, function(report){
-			expect(report.getTemperature()).to.be.equal(12.3)
-			done()
+			expect(report.getTemperature()).to.be.equal(13.5);
+			expect(report.temperature).to.be.equal(13.5);
+			done();
 		});
-		server.once("connection", function(sock){
-			sock.once("data", function(data) {
-				sock.write(new Buffer([2, 9, 0x10, 1, 20, 0, 5, 0, 123, 176]))
-			})
-		})
 	})
 
-  it('should get status of temperature sensor 5 in kelvin', function(done){
+  it('should get temperature of sensor 5 in kelvin', function(done){
     teletask.get(Teletask.functions.sensor, 5, function(report){
-      expect(report.getTemperature("kelvin")).to.be.equal(12.3 - 273.15)
-      done()
+      expect(report.getTemperature("kelvin")).to.be.equal(13.5 + 273);
+      done();
     });
-    server.once("connection", function(sock){
-      sock.once("data", function(data) {
-        sock.write(new Buffer([2, 9, 0x10, 1, 20, 0, 5, 0, 123, 176]))
-      })
-    })
   })
 
-  it('should get status of temperature sensor 5 in fahrenheit', function(done){
+  it('should get temperature of sensor 5 in fahrenheit', function(done){
     teletask.get(Teletask.functions.sensor, 5, function(report){
-      expect(report.getTemperature("fahrenheit")).to.be.equal(54.14)
-      done()
+      expect(report.getTemperature("fahrenheit")).to.be.equal(56.3);
+      done();
     });
-    server.once("connection", function(sock){
-      sock.once("data", function(data) {
-        sock.write(new Buffer([2, 9, 0x10, 1, 20, 0, 5, 0, 123, 176]))
-      })
-    })
   })
+	describe('Thermostate', function(){
+		it('should get day temperature', function(done){
+			teletask.get(Teletask.functions.sensor, 5, function(report){
+				expect(report.thermostate.day).to.be.equal(20);
+				done();
+			});
+		})
 
-	// it('should get status of relay 21 (which is on)', function(done){
-	// 	teletask.get(Teletask.functions.relay, 21, function(report){
-	// 		expect(report.fnc.fnc).to.be.equal(Teletask.functions.relay)
-	// 		expect(report.number).to.be.equal(21)
-	// 		expect(report.value.value).to.be.equal(Teletask.settings.on)
-	// 		done()
-	// 	});
-	// 	server.once("connection", function(sock){
-	// 		sock.once("data", function(data) {
-	// 			sock.write(new Buffer([2, 9, 0x10, 1, 1, 0, 21, 0, 255, 0x31]))
-	// 		})
-	// 	})
-	// })
+		it('should get night temperature', function(done){
+			teletask.get(Teletask.functions.sensor, 5, function(report){
+				expect(report.thermostate.night).to.be.equal(10);
+				done();
+			});
+		})
 
+		it('should get standby preset', function(done){
+			teletask.get(Teletask.functions.sensor, 5, function(report){
+				expect(report.thermostate.standby_preset).to.be.equal(2.5);
+				done();
+			});
+		})
+
+		it('should get mode', function(done){
+			teletask.get(Teletask.functions.sensor, 5, function(report){
+				expect(report.thermostate.mode).to.be.equal('auto');
+				done();
+			});
+		})
+
+		it('should get day speed', function(done){
+			teletask.get(Teletask.functions.sensor, 5, function(report){
+				expect(report.thermostate.speed).to.be.equal('auto');
+				done();
+			});
+		})
+	})
 })

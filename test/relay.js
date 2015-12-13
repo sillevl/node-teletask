@@ -65,7 +65,7 @@ describe('Relays', function(){
 	describe('get the status of a relay', function(){
 		it('should get status of relay 21 (which is off)', function(done){
 			teletask.get(Teletask.functions.relay, 21, function(report){
-				expect(report.value.value).to.be.equal(Teletask.settings.off)
+				expect(report.status).to.be.equal(Teletask.settings.getKey(Teletask.settings.off))
 				done()
 			});
 			server.once("connection", function(sock){
@@ -77,9 +77,9 @@ describe('Relays', function(){
 
 		it('should get status of relay 21 (which is on)', function(done){
 			teletask.get(Teletask.functions.relay, 21, function(report){
-				expect(report.fnc.fnc).to.be.equal(Teletask.functions.relay)
+				expect(report.fnc).to.be.equal(Teletask.functions.getKey(Teletask.functions.relay))
 				expect(report.number).to.be.equal(21)
-				expect(report.value.value).to.be.equal(Teletask.settings.on)
+				expect(report.status).to.be.equal(Teletask.settings.getKey(Teletask.settings.on))
 				done()
 			});
 			server.once("connection", function(sock){
