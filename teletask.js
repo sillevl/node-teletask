@@ -18,7 +18,14 @@ var connect = function(host, port, callback){
 	var self = this;
 
 	socket = new net.Socket();
-	socket.connect(port, host, callback);
+	socket.connect(port, host, function(){
+		callback();
+		setInterval(function(){
+			keepalive();
+		}, 60*1000);
+	});
+
+
 
 	socket.on('data', function(data){
 		while(data.length !== 0){
