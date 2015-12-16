@@ -15,7 +15,7 @@ describe('Sensors', function(){
 		server = net.createServer().listen(PORT,done);
 		server.once("connection", function(sock){
 			sock.once("data", function(data) {
-				sock.write(new Buffer([2,26,16,1,20,0,4,0,11,49,11,119,11,114,11,14,25,0,94,89,255,0,9,0,11,214,82]));
+				sock.write(new Buffer([2,26,16,1,20,0,5,0,11,49,11,119,11,114,11,14,25,0,94,89,255,0,9,0,11,214,83]));
 			})
 		})
 	})
