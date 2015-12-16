@@ -14,15 +14,14 @@ exports.settings = settings;
 var connect = function(host, port, callback){
 
 	EventEmitter.call(this);
-	//var ee = new EventEmitter();
 	var self = this;
+
+	var keepaliveInterval;
 
 	socket = new net.Socket();
 	socket.connect(port, host, function(){
-		callback();
-		setInterval(function(){
-			keepalive();
-		}, 60*1000);
+		if(typeof callback === 'function'){	callback(); }
+		keepaliveInterval = setInterval(this.keepalive, 60*1000);
 	});
 
 
@@ -95,6 +94,7 @@ var connect = function(host, port, callback){
 
 	this.close = function(){
 		socket.end();
+		clearInterval(keepaliveInterval);
 	};
 };
 
