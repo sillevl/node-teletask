@@ -13,49 +13,37 @@ exports.settings = settings;
 
 connect = function(host, port, callback){
 
-	var i = 0;
-
 	EventEmitter.call(this);
-
+	//var ee = new EventEmitter();
 	var self = this;
 
 	socket = new net.Socket;
-	socket.connect(port, host, function() {
-	   	if (typeof callback === "function") {
-	    	callback();
-	    }
-	});
+	socket.connect(port, host, callback);
 
-/*	socket.on('data', function(data) {
-		if(data[0] != 10 && data.length != 1){
-	    	self.emit('report', Report.parse(data));
-	    }
-	});*/
-
-	socket.on('error', function(err){
-		console.log(err);
-	});
-
-	this.write = function(data, callback){
-		socket.write(data.toBinary(), function(){
-			g = function(data) {
-				if(data[0] == 10 && data.length == 1){
-					//clearTimeout(timeout);
-				} else {
-					try{
-						var response = Report.parse(data);
-						socket.removeListener('data', g);
-						if (typeof callback === "function") {
-							callback(response);
-						}
-					} catch (err) {
-						console.log("Parsing error: " + err)
-						socket.removeListener('data', g);
-					}
+	socket.on('data', function(data){
+		while(data.length != 0){
+			if(data[0] == 10){  // Acknowledge
+				data = data.slice(1);
+				self.emit("acknowledge");
+				// clear acknowledge timeout
+			} else {
+				try{
+					var report = Report.parse(data);
+					self.emit("report", report);
+					data = data.slice(report.size+1);
+				} catch (err) {
+					console.log("Parsing error: " + err)
+					data = data.slice(1);
 				}
 			}
-			socket.on('data', g);
-		});
+		}
+	});
+
+
+	// should all these functions be set by prototype?????
+
+	this.write = function(data, callback){
+		socket.write(data.toBinary(), callback);
 /*		var timeout = setTimeout(function(){
 			throw "Acknowledge timeout (1000ms)";
 		}, 1000);*/
@@ -65,15 +53,22 @@ connect = function(host, port, callback){
 	this.set = function(fnc,number, setting, data){
 	    var request = new Set(fnc, number,setting);
 	    this.write(request);
-	}
+		}
+
 
 	this.get = function(fnc, number, callback){
 		var request = new Get(fnc, number);
-	  this.write(request, function(data){
-			if (typeof callback === "function") {
-				callback(data);
+	  this.write(request, function(){
+				self.on("report", function(report){
+					if (typeof callback === "function" &&
+							number == report.number &&
+							fnc == functions[report.fnc]
+							) {
+						callback(report);
+					}
+				})
 			}
-    });
+		);
 	}
 
 	this.groupget = function(fnc, numbers){
@@ -94,6 +89,10 @@ connect = function(host, port, callback){
 	this.keepalive = function(){
 		var request = new KeepAlive();
 	    this.write(request);
+	}
+
+	this.close = function(){
+		socket.end();
 	}
 }
 
