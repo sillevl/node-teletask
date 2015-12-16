@@ -17,7 +17,7 @@ connect = function(host, port, callback){
 	//var ee = new EventEmitter();
 	var self = this;
 
-	socket = new net.Socket;
+	socket = new net.Socket();
 	socket.connect(port, host, callback);
 
 	socket.on('data', function(data){
@@ -47,13 +47,12 @@ connect = function(host, port, callback){
 /*		var timeout = setTimeout(function(){
 			throw "Acknowledge timeout (1000ms)";
 		}, 1000);*/
-
-	}
+	};
 
 	this.set = function(fnc,number, setting, data){
 	    var request = new Set(fnc, number,setting);
 	    this.write(request);
-		}
+		};
 
 
 	this.get = function(fnc, number, callback){
@@ -66,35 +65,35 @@ connect = function(host, port, callback){
 							) {
 						callback(report);
 					}
-				})
+				});
 			}
 		);
-	}
+	};
 
 	this.groupget = function(fnc, numbers){
 		var request = new GroupGet(fnc, numbers);
 	    this.write(request);
-	}
+	};
 
 	this.logEnable = function(fnc){
 		var request = new Log(fnc, settings.on);
 	    this.write(request);
-	}
+	};
 
 	this.logDisable = function(fnc){
 		var request = new Log(fnc, settings.off);
 	    this.write(request);
-	}
+	};
 
 	this.keepalive = function(){
 		var request = new KeepAlive();
 	    this.write(request);
-	}
+	};
 
 	this.close = function(){
 		socket.end();
-	}
-}
+	};
+};
 
 util.inherits(connect, EventEmitter);
 
