@@ -11,7 +11,7 @@ var EventEmitter = require('events').EventEmitter;
 exports.functions = functions;
 exports.settings = settings;
 
-connect = function(host, port, callback){
+var connect = function(host, port, callback){
 
 	EventEmitter.call(this);
 	//var ee = new EventEmitter();
