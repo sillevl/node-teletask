@@ -75,13 +75,9 @@ var connect = function(host, port, callback){
 	    this.write(request);
 	};
 
-	this.logEnable = function(fnc){
-		var request = new Log(fnc, settings.on);
-	    this.write(request);
-	};
-
-	this.logDisable = function(fnc){
-		var request = new Log(fnc, settings.off);
+	this.log = function(fnc, status){
+		var state = (typeof status === 'undefined' || status === true) ? settings.on : settings.off;
+		var request = new Log(fnc, state);
 	    this.write(request);
 	};
 
