@@ -13,22 +13,22 @@ describe('Keepalive', function(){
 	beforeEach(function(done){
 		teletask = new Teletask.connect(HOST,PORT);
 		server = net.createServer().listen(PORT,done);
-	})
+	});
 
 	afterEach(function() {
-		server.close()
-	})
+		server.close();
+	});
 
 	it('should should send keepalive', function(done){
 		teletask.keepalive();
 		server.once("connection", function(sock){
       sock.once("data", function(data) {
-				expect(data).to.be.eql(new Buffer([2, 3, 0x0b, 0x10]))
-				done()
-      })
-    })
-	})
+				expect(data).to.be.eql(new Buffer([2, 3, 0x0b, 0x10]));
+				done();
+      });
+    });
+	});
 
 	it('should keep sending keepalive after interval');
 
-})
+});

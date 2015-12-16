@@ -21,7 +21,7 @@ var connect = function(host, port, callback){
 	socket.connect(port, host, callback);
 
 	socket.on('data', function(data){
-		while(data.length != 0){
+		while(data.length !== 0){
 			if(data[0] == 10){  // Acknowledge
 				data = data.slice(1);
 				self.emit("acknowledge");
@@ -32,7 +32,7 @@ var connect = function(host, port, callback){
 					self.emit("report", report);
 					data = data.slice(report.size+1);
 				} catch (err) {
-					console.log("Parsing error: " + err)
+					console.log("Parsing error: " + err);
 					data = data.slice(1);
 				}
 			}
