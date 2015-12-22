@@ -32,15 +32,19 @@ var connect = function(host, port, callback){
 				data = data.slice(1);
 				self.emit("acknowledge");
 				// clear acknowledge timeout
-			} else {
+			} else if(data[0] == 0x02) {
 				try{
 					var report = Report.parse(data);
 					self.emit("report", report);
 					data = data.slice(report.size+1);
 				} catch (err) {
 					console.log("Parsing error: " + err);
-					data = data.slice(1);
+					var startIndex = data.indexOf(0x02);
+					data = data.slice(startIndex);
 				}
+			} else {
+				console.log("next... " + data);
+				data = data.slice(1);
 			}
 		}
 	});
