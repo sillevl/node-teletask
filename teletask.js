@@ -21,7 +21,7 @@ var connect = function(host, port, callback){
 	socket = new net.Socket();
 	socket.connect(port, host, function(){
 		if(typeof callback === 'function'){	callback(); }
-		keepaliveInterval = setInterval(this.keepalive, 60*1000);
+		keepaliveInterval = setInterval(self.keepalive, 1000);
 	});
 
 
@@ -90,7 +90,7 @@ var connect = function(host, port, callback){
 
 	this.keepalive = function(){
 		var request = new KeepAlive();
-	    this.write(request);
+	    self.write(request);
 	};
 
 	this.close = function(){
