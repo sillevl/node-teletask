@@ -1,6 +1,6 @@
 {
   "name": "node-teletask",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Teletask api for nodejs",
   "main": "teletask.js",
   "directories": {
