@@ -32,19 +32,15 @@ var connect = function(host, port, callback){
 				data = data.slice(1);
 				self.emit("acknowledge");
 				// clear acknowledge timeout
-			} else if(data[0] == 0x02) {
+			} else {
 				try{
 					var report = Report.parse(data);
 					self.emit("report", report);
 					data = data.slice(report.size+1);
 				} catch (err) {
 					console.log("Parsing error: " + err);
-					var startIndex = data.indexOf(0x02);
-					data = data.slice(startIndex);
+					data = data.slice(1);
 				}
-			} else {
-				console.log("next... " + data);
-				data = data.slice(1);
 			}
 		}
 	});
@@ -67,17 +63,18 @@ var connect = function(host, port, callback){
 
 	this.get = function(fnc, number, callback){
 		var request = new Get(fnc, number);
-	  this.write(request, function(){
-				self.on("report", function(report){
-					if (typeof callback === "function" &&
-							number == report.number &&
-							fnc == functions[report.fnc]
-							) {
-						callback(report);
-					}
-				});
+		this.write(request, function(){
+			var reportCallback = function(report){
+				if (typeof callback === "function" &&
+						number == report.number &&
+						fnc == functions[report.fnc]
+						) {
+					callback(report);
+					self.removeListener("report", reportCallback);
+				}
 			}
-		);
+			self.on("report", reportCallback);
+		});
 	};
 
 	this.groupget = function(fnc, numbers){
